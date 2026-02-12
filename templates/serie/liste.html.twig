@@ -5,6 +5,13 @@
 {% block body %}
     <h2>Catalogue</h2>
 
+    {% if page > 1 %}
+        <a href="{{ path('app_serie_liste', {page : page - 1}) }}">Page précédente</a>&nbsp;
+    {% endif %}
+    {% if page < nb_pages_max %}
+        <a href="{{ path('app_serie_liste', {page : page + 1}) }}">Page suivante</a>
+    {% endif %}
+
     <table>
         <tr>
             <th>Id</th>
@@ -23,7 +30,7 @@
                 <td>{{ serie.status }}</td>
                 <td>{{ serie.genres }}</td>
                 <td>{{ serie.firstAirDate|date('d/m/Y') }}</td>
-                <td>{{ serie.lastAirDate|date('d/m/Y') }}</td>
+                <td>{{ serie.lastAirDate ? serie.lastAirDate|date('d/m/Y') : 'pas de date' }}</td>
             </tr>
         {% endfor %}
     </table>
