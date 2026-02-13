@@ -32,10 +32,10 @@ final class SerieController extends AbstractController
     }
 
     #[Route('/liste/{page}', name: '_liste', requirements:['page' => '\d+'], methods: ['GET'])]
-    public function liste(SerieRepository $serieRepository, ParameterBagInterface $parameterBag, int $page = 1): Response
+    public function liste(SerieRepository $serieRepository, int $page = 1): Response
     {
         # appel aux parameters définis dans le fichier config/services.yaml
-        $limit = $parameterBag->get('nb_limit_series');
+        $limit = $this->getParameter('nb_limit_series');
 
         # Méthode heritée du Repository
         //$series = $serieRepository->findAll();
