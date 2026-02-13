@@ -46,7 +46,7 @@ final class SerieController extends AbstractController
 
         $criterias = [
             'status' => 'returning',
-            'genres' => 'Horror'
+            //'genres' => 'Horror'
         ];
 
         $nbTotal = $serieRepository->count($criterias);

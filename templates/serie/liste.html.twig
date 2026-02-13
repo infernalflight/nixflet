@@ -3,36 +3,24 @@
 {% block title %}{{ parent() }} | Catalogue{% endblock %}
 
 {% block body %}
-    <h2>Catalogue</h2>
+    <section>
+        {% if page > 1 %}
+            <a href="{{ path('app_serie_liste', {page : page - 1}) }}">Page précédente</a>&nbsp;
+        {% endif %}
+        {% if page < nb_pages_max %}
+            <a href="{{ path('app_serie_liste', {page : page + 1}) }}">Page suivante</a>
+        {% endif %}
+    </section>
 
-    {% if page > 1 %}
-        <a href="{{ path('app_serie_liste', {page : page - 1}) }}">Page précédente</a>&nbsp;
-    {% endif %}
-    {% if page < nb_pages_max %}
-        <a href="{{ path('app_serie_liste', {page : page + 1}) }}">Page suivante</a>
-    {% endif %}
-
-    <table>
-        <tr>
-            <th>Id</th>
-            <th>Nom</th>
-            <th>Overview</th>
-            <th>Status</th>
-            <th>Genres</th>
-            <th>1st air date</th>
-            <th>last air date</th>
-        </tr>
+    <section class="series-list">
         {% for serie in series %}
-            <tr>
-                <td>{{ serie.id }}</td>
-                <td>{{ serie.name }}</td>
-                <td>{{ serie.overview }}</td>
-                <td>{{ serie.status }}</td>
-                <td>{{ serie.genres }}</td>
-                <td>{{ serie.firstAirDate|date('d/m/Y') }}</td>
-                <td>{{ serie.lastAirDate ? serie.lastAirDate|date('d/m/Y') : 'pas de date' }}</td>
-            </tr>
+            <a href="#">
+                <img src="{{ asset('resources/posters/series/' ~ serie.poster) }}" width="250px"
+                     alt="{{ 'Poster de ' ~ serie.name }}" loading="lazy">
+            </a>
+        {% else %}
+            <p>Pas de série</p>
         {% endfor %}
-    </table>
+    </section>
 
 {% endblock %}
