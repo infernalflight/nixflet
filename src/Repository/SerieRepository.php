@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Serie;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -41,6 +42,38 @@ class SerieRepository extends ServiceEntityRepository
         ];
     }
 
+    public function findSeriesDQL(): array
+    {
+        $dql = <<<DQL
+SELECT s FROM App\Entity\Serie s
+WHERE (s.firstAirDate <= :date OR s.status = :status)
+AND s.name like :partial
+ORDER BY s.popularity DESC
+DQL;
+
+        return $this->getEntityManager()->createQuery($dql)
+            ->setParameter('date', new \DateTime('1990-01-01'))
+            ->setParameter('status', 'ended')
+            ->setParameter('partial', '%a%')
+            ->setMaxResults(10)
+            ->setFirstResult(0)
+            ->execute();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getStats(): array
+    {
+        $sql = <<<SQL
+    SELECT s.status, COUNT(s.id) FROM serie s GROUP BY status
+SQL;
+
+        return $this->getEntityManager()
+            ->getConnection()
+            ->executeQuery($sql)
+            ->fetchAllAssociative();
+    }
 
 
 //    /**
