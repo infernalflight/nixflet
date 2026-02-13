@@ -16,6 +16,33 @@ class SerieRepository extends ServiceEntityRepository
         parent::__construct($registry, Serie::class);
     }
 
+    public function findSeriesCustom(int $offset, int $limit, string $status, \DateTime $date, ?float $vote = null): array
+    {
+        $q = $this->createQueryBuilder('s')
+            ->orderBy('s.popularity', 'DESC')
+            ->andWhere('s.status = :status OR s.firstAirDate <= :date')
+            ->setParameter('status', $status)
+            ->setParameter('date', $date);
+
+        if ($vote) {
+            $q->orWhere('s.vote >= :vote')
+                ->setParameter('vote', $vote);
+        }
+
+        $q2 = clone $q;
+        $q2->select('COUNT(s.id)');
+
+        return [
+            $q2->getQuery()->getSingleScalarResult(),
+            $q->setFirstResult($offset) // offset = rang de la pagination
+            ->setMaxResults($limit) // nb de resultats du lot
+            ->getQuery()
+            ->getResult()
+        ];
+    }
+
+
+
 //    /**
 //     * @return Serie[] Returns an array of Serie objects
 //     */

@@ -13,32 +13,36 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/serie', name: 'app_serie')]
 final class SerieController extends AbstractController
 {
-    #[Route('/test', name: '_test')]
-    public function test(EntityManagerInterface $em): Response
-    {
-        $serie = new Serie();
-        $serie->setName('Derrick')
-            ->setOverview('Encore une enquête pour l\'inspecteur')
-            ->setStatus('Ended')
-            ->setGenres('série policière allemande')
-            ->setFirstAirDate(new \DateTime('1974-10-20'))
-            ->setLastAirDate(new \DateTime('1998-10-16'))
-            ->setDateCreated(new \DateTime());
+    #[Route('/liste/{page}', name: '_liste', requirements: ['page' => '\d+'], methods: ['GET'])]
+     public function list(SerieRepository $serieRepository, int $page = 1): Response
+     {
+         $limit = $this->getParameter('nb_limit_series');
 
-        $em->persist($serie);
-        $em->flush();
+         # restriction à page > 1
+         $page = max($page, 1);
+         $offset = ($page - 1) * $limit;
 
-        return new Response('Derrick est à la maison');
-    }
+         $nbTotal = $serieRepository->count([]);
+         $nbPagesMax = ceil($nbTotal / $limit);
 
-    #[Route('/liste/{page}', name: '_liste', requirements:['page' => '\d+'], methods: ['GET'])]
-    public function liste(SerieRepository $serieRepository, int $page = 1): Response
+         if ($page > $nbPagesMax) {
+             throw $this->createNotFoundException('La page ' . $page . ' n\'existe pas');
+         }
+
+         $series = $serieRepository->findBy([], ['popularity' => 'DESC'], $limit, $offset);
+         return $this->render('serie/liste.html.twig', [
+             'series' => $series,
+             'page' => $page,
+             'nb_pages_max' => $nbPagesMax,
+         ]);
+     }
+
+
+    #[Route('/liste/find_by/{page}', name: '_liste_find_by', requirements:['page' => '\d+'], methods: ['GET'])]
+    public function listeFindby(SerieRepository $serieRepository, int $page = 1): Response
     {
         # appel aux parameters définis dans le fichier config/services.yaml
         $limit = $this->getParameter('nb_limit_series');
-
-        # Méthode heritée du Repository
-        //$series = $serieRepository->findAll();
 
         # restriction à page > 1
         $page = max($page, 1);
@@ -69,10 +73,34 @@ final class SerieController extends AbstractController
         ]);
     }
 
+    #[Route('/liste/find_custom/{page}', name: '_liste_find_custom', requirements:['page' => '\d+'], methods: ['GET'])]
+    public function listeFindCustom(SerieRepository $serieRepository, int $page = 1): Response
+    {
+        $limit = $this->getParameter('nb_limit_series');
+
+        # restriction à page > 1
+        $page = max($page, 1);
+        $offset = ($page - 1) * $limit;
+
+        # Méthode custom du Repository
+        list($nbTotal, $series) = $serieRepository->findSeriesCustom($offset, $limit, 'returning', new \DateTime('1990-01-01'), 7.5);
+
+        $nbPagesMax = ceil($nbTotal / $limit);
+
+        if ($page > $nbPagesMax) {
+            throw $this->createNotFoundException('La page ' . $page . ' n\'existe pas');
+        }
+
+        return $this->render('serie/liste.html.twig', [
+            'series' => $series,
+            'page' => $page,
+            'nb_pages_max' => $nbPagesMax,
+        ]);
+    }
+
     #[Route('/detail/{id}', name: '_detail', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function detail(Serie $serie): Response
     {
-
         return $this->render('serie/detail.html.twig', [
             'serie' => $serie,
         ]);
