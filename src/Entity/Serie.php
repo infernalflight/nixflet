@@ -17,7 +17,7 @@ class Serie
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'La série doit avoir un titre !!')]
-    #[Assert\Length(min: 3, max: 15,
+    #[Assert\Length(min: 3, max: 200,
         minMessage: 'Le titre doit avoir au moins {{ limit }} caractères',
         maxMessage: 'Le titre ne doit pas dépassser {{ limit }} caractères.')
     ]
@@ -42,11 +42,13 @@ class Serie
     private ?string $genres = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Assert\LessThan('today', message: 'Cette date doit être antérieure à aujourd\'hui')]
+    #[Assert\Type("\DateTimeInterface")]
+    #[Assert\LessThan('-1 weeks', message: 'Cette date doit être antérieure à {{ compared_value }}')]
     private ?\DateTime $firstAirDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    #[Assert\GreaterThan(propertyPath: 'firstAirDate', message: 'La date ne doit pas être antérieure à la date de lancement')]
+    #[Assert\Type("\DateTimeInterface")]
+    #[Assert\GreaterThan(propertyPath: 'firstAirDate', message: 'La date ne doit pas être antérieure à {{ compared_value }}')]
     private ?\DateTime $lastAirDate = null;
 
     #[ORM\Column(length: 255, nullable: true)]

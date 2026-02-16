@@ -2,10 +2,17 @@
 
 {% form_theme serie_form 'bootstrap_5_layout.html.twig' %}
 
-{% block title %}{{ parent() }} - Creation Serie{% endblock %}
+{% block title %}
+    {{ parent() }} - {{ serie is defined ? 'Editer la série ' ~ serie.id : 'Creation Serie' }}
+{% endblock %}
 
 {% block body %}
-    <h2>Créer une nouvelle série</h2>
+    {% if serie is defined %}
+        <h2>Modifier la série {{ serie.name }}</h2>
+    {% else %}
+        <h2>Créer une nouvelle série</h2>
+    {% endif %}
+
     <div class="row justify-content-center">
         <div class="col-12 col-md-6">
             {{ form(serie_form) }}

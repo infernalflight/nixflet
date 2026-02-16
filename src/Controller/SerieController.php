@@ -118,11 +118,47 @@ final class SerieController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Une nouvelle série a été enregistrée');
-            return $this->redirectToRoute('app_serie_liste');
+            return $this->redirectToRoute('app_serie_detail', ['id' => $serie->getId()]);
         }
 
         return $this->render('serie/edit.html.twig', [
             'serie_form' => $serieForm,
         ]);
+    }
+
+    #[Route('/update/{id}', name: '_update', requirements: ['id' => '\d+'])]
+    public function update(Request $request, EntityManagerInterface $em, Serie $serie): Response
+    {
+        $serieForm = $this->createForm(SerieType::class, $serie);
+        $serieForm->handleRequest($request);
+        if ($serieForm->isSubmitted() && $serieForm->isValid()) {
+            $serie->setDateModified(new \DateTime());
+            $em->flush();
+
+            $this->addFlash('success', "La série {$serie->getName()} a été modifiée");
+            return $this->redirectToRoute('app_serie_detail', ['id' => $serie->getId()]);
+        }
+
+        return $this->render('serie/edit.html.twig', [
+            'serie_form' => $serieForm,
+            'serie' => $serie,
+        ]);
+    }
+
+    #[Route('/delete/{id}', name: '_delete', requirements: ['id' => '\d+'])]
+    public function delete(Serie $serie, EntityManagerInterface $em, Request $request): Response
+    {
+        $token = $request->query->get('token');
+
+        if ($this->isCsrfTokenValid('serie_delete' . $serie->getId(), $token)) {
+            $em->remove($serie);
+            $em->flush();
+
+            $this->addFlash('success', 'Une série a été supprimée');
+            return $this->redirectToRoute('app_serie_liste');
+        }
+
+        $this->addFlash('danger', 'Cette action est impossible!');
+        return $this->redirectToRoute('app_serie_detail', ['id' => $serie->getId()]);
     }
 }
