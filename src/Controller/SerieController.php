@@ -3,8 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Serie;
+use App\Form\SerieType;
 use App\Repository\SerieRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -34,7 +37,6 @@ final class SerieController extends AbstractController
              'nb_pages_max' => $nbPagesMax,
          ]);
      }
-
 
     #[Route('/liste/find_by/{page}', name: '_liste_find_by', requirements:['page' => '\d+'], methods: ['GET'])]
     public function listeFindby(SerieRepository $serieRepository, int $page = 1): Response
@@ -101,6 +103,26 @@ final class SerieController extends AbstractController
     {
         return $this->render('serie/detail.html.twig', [
             'serie' => $serie,
+        ]);
+    }
+
+    #[Route('/create', name: '_create')]
+    public function create(Request $request, EntityManagerInterface $em): Response
+    {
+        $serie = new Serie();
+        $serieForm = $this->createForm(SerieType::class, $serie);
+        $serieForm->handleRequest($request);
+        if ($serieForm->isSubmitted() && $serieForm->isValid()) {
+            $serie->setDateCreated(new \DateTime());
+            $em->persist($serie);
+            $em->flush();
+
+            $this->addFlash('success', 'Une nouvelle série a été enregistrée');
+            return $this->redirectToRoute('app_serie_liste');
+        }
+
+        return $this->render('serie/edit.html.twig', [
+            'serie_form' => $serieForm,
         ]);
     }
 }
