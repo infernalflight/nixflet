@@ -17,6 +17,19 @@ class SerieRepository extends ServiceEntityRepository
         parent::__construct($registry, Serie::class);
     }
 
+    public function getSerieWithSeasons(int $id): Serie
+    {
+        return $this->createQueryBuilder('serie')
+            ->addSelect('seasons')
+            ->leftJoin('serie.seasons', 'seasons')
+            ->andWhere('serie.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+
+
     public function findSeriesCustom(int $offset, int $limit, string $status, \DateTime $date, ?float $vote = null): array
     {
         $q = $this->createQueryBuilder('s')

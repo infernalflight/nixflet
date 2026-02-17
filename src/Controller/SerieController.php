@@ -31,6 +31,8 @@ final class SerieController extends AbstractController
          }
 
          $series = $serieRepository->findBy([], ['popularity' => 'DESC'], $limit, $offset);
+
+
          return $this->render('serie/liste.html.twig', [
              'series' => $series,
              'page' => $page,
@@ -99,8 +101,10 @@ final class SerieController extends AbstractController
     }
 
     #[Route('/detail/{id}', name: '_detail', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function detail(Serie $serie): Response
+    public function detail(int $id, SerieRepository $serieRepository): Response
     {
+        $serie = $serieRepository->getSerieWithSeasons($id);
+
         return $this->render('serie/detail.html.twig', [
             'serie' => $serie,
         ]);
