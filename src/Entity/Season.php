@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SeasonRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Season
 {
     #[ORM\Id]
@@ -138,5 +139,17 @@ class Season
         $this->serie = $serie;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function onPersist(): void
+    {
+        $this->dateCreated = new \DateTime();
+    }
+
+    #[ORM\PreUpdate]
+    public function onUpdate(): void
+    {
+        $this->dateModified = new \DateTime();
     }
 }

@@ -23,7 +23,7 @@
         <h3>Les Saisons:</h3>
         <ul>
             {% for season in serie.seasons %}
-                <li>{{ season.number }} : {{ season.overview }} - {{ season.firstAirDate|date('d/m/Y') }}</li>
+                <li>{{ season.number }} : {{ season.overview }} - {{ season.firstAirDate|date('d/m/Y') }} <a href="{{ path('app_season_update', {id: season.id}) }}">Modifier</a></li>
             {% endfor %}
         </ul>
     </section>
