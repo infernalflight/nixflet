@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SerieRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Serie
 {
     #[ORM\Id]
@@ -65,6 +66,18 @@ class Serie
 
     #[ORM\Column(nullable: true)]
     private ?\DateTime $dateModified = null;
+
+    #[ORM\PrePersist]
+    public function onPersist(): void
+    {
+        $this->dateCreated = new \DateTime();
+    }
+
+    #[ORM\PreUpdate]
+    public function onUpdate(): void
+    {
+        $this->dateModified = new \DateTime();
+    }
 
     public function getId(): ?int
     {

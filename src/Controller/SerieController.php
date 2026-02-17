@@ -113,7 +113,6 @@ final class SerieController extends AbstractController
         $serieForm = $this->createForm(SerieType::class, $serie);
         $serieForm->handleRequest($request);
         if ($serieForm->isSubmitted() && $serieForm->isValid()) {
-            $serie->setDateCreated(new \DateTime());
             $em->persist($serie);
             $em->flush();
 
@@ -132,9 +131,7 @@ final class SerieController extends AbstractController
         $serieForm = $this->createForm(SerieType::class, $serie);
         $serieForm->handleRequest($request);
         if ($serieForm->isSubmitted() && $serieForm->isValid()) {
-            $serie->setDateModified(new \DateTime());
             $em->flush();
-
             $this->addFlash('success', "La série {$serie->getName()} a été modifiée");
             return $this->redirectToRoute('app_serie_detail', ['id' => $serie->getId()]);
         }
