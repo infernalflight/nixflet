@@ -10,8 +10,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/serie', name: 'app_serie')]
+#[IsGranted('ROLE_USER')]
 final class SerieController extends AbstractController
 {
     #[Route('/liste/{page}', name: '_liste', requirements: ['page' => '\d+'], methods: ['GET'])]
@@ -111,6 +113,7 @@ final class SerieController extends AbstractController
     }
 
     #[Route('/create', name: '_create')]
+    #[IsGranted('ROLE_CONTRIB')]
     public function create(Request $request, EntityManagerInterface $em): Response
     {
         $serie = new Serie();
@@ -130,6 +133,7 @@ final class SerieController extends AbstractController
     }
 
     #[Route('/update/{id}', name: '_update', requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_CONTRIB')]
     public function update(Request $request, EntityManagerInterface $em, Serie $serie): Response
     {
         $serieForm = $this->createForm(SerieType::class, $serie);
@@ -147,6 +151,7 @@ final class SerieController extends AbstractController
     }
 
     #[Route('/delete/{id}', name: '_delete', requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(Serie $serie, EntityManagerInterface $em, Request $request): Response
     {
         $token = $request->query->get('token');
