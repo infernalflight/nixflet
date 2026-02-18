@@ -12,6 +12,10 @@ final class MainController extends AbstractController
     #[Route('/', name: 'app_home')]
     public function index(): Response
     {
+        // récupérer l'utilisateur connecté
+        //dd($this->getUser());
+
+
         return $this->render('main/home.html.twig');
     }
 }
