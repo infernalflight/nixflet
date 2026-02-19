@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Serie;
 use App\Form\SerieType;
+use App\Helper\FileManager;
 use App\Repository\SerieRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -116,17 +117,16 @@ final class SerieController extends AbstractController
 
     #[Route('/create', name: '_create')]
     #[IsGranted('ROLE_CONTRIB')]
-    public function create(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
+    public function create(Request $request, EntityManagerInterface $em, FileManager $fileManager): Response
     {
         $serie = new Serie();
         $serieForm = $this->createForm(SerieType::class, $serie);
         $serieForm->handleRequest($request);
         if ($serieForm->isSubmitted() && $serieForm->isValid()) {
             $file = $serieForm->get('posterFile')->getData();
+
             if ($file instanceof UploadedFile) {
-                $newName = sprintf('%s-%s.%s', $slugger->slug($serie->getName()), uniqid(), $file->guessExtension());
-                $dir = $this->getParameter('poster_path');
-                $file->move($dir, $newName);
+                $newName = $fileManager->upload($file, $this->getParameter('poster_path'), $serie->getName());
                 $serie->setPoster($newName);
             }
 
@@ -144,11 +144,19 @@ final class SerieController extends AbstractController
 
     #[Route('/update/{id}', name: '_update', requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_CONTRIB')]
-    public function update(Request $request, EntityManagerInterface $em, Serie $serie): Response
+    public function update(Request $request, EntityManagerInterface $em, Serie $serie, FileManager $fileManager): Response
     {
         $serieForm = $this->createForm(SerieType::class, $serie);
         $serieForm->handleRequest($request);
         if ($serieForm->isSubmitted() && $serieForm->isValid()) {
+            $file = $serieForm->get('posterFile')->getData();
+
+            if ($file instanceof UploadedFile) {
+                $newName = $fileManager->upload($file, $this->getParameter('poster_path'), $serie->getName(), $serie->getPoster());
+
+                $serie->setPoster($newName);
+            }
+
             $em->flush();
             $this->addFlash('success', "La série {$serie->getName()} a été modifiée");
             return $this->redirectToRoute('app_serie_detail', ['id' => $serie->getId()]);
