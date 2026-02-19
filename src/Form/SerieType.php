@@ -2,8 +2,10 @@
 
 namespace App\Form;
 
+use App\DataTransformer\SlashTransformer;
 use App\Entity\Serie;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -26,7 +28,13 @@ class SerieType extends AbstractType
             ->add('overview', TextareaType::class, [
                 'required' => false,
             ])
-            ->add('genres')
+            ->add('genres', ChoiceType::class, [
+                'label' => 'Genre',
+                'choices' => array_combine(
+                    ['War','Thriller', 'Politics', 'Western', 'Drama', 'Sci-Fi', 'Comedy'],
+                    ['War','Thriller', 'Politics', 'Western', 'Drama', 'Sci-Fi', 'Comedy']),
+                'multiple' => true
+            ])
             ->add('status', ChoiceType::class, [
                 'required' => false,
                 'choices' => [
@@ -67,6 +75,7 @@ class SerieType extends AbstractType
                 ]
             ])
         ;
+        $builder->get('genres')->addModelTransformer(new SlashTransformer());
     }
 
     public function configureOptions(OptionsResolver $resolver): void
