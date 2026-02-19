@@ -38,7 +38,7 @@
                 </ul>
             </nav>
         </header>
-        {% if app.user is defined %}
+        {% if app.user is not empty %}
             <p>Vous êtes connectés en tant que {{ app.user.username }}</p>
         {% endif %}
 
